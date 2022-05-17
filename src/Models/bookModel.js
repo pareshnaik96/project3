@@ -51,11 +51,10 @@ const bookSchema = mongoose.Schema(
         releasedAt: {
             type: Date,
             required:[true,"Released date is Required"],
-            default: new Date()
         }
     },
     { timestamps: true }
 );
 
 
-module.exports = mongoose.model('Book', bookSchema)
+module.exports = mongoose.model('Book', bookSchema);

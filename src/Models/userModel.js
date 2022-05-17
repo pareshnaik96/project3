@@ -1,5 +1,9 @@
 const mongoose = require("mongoose")
 
+let validatephone = function(phone){
+    phoneRegex = /^[6-9]\d{9}$/
+    return phoneRegex.test(phone)
+};
 let validateEmail = function (email) {
     let emailRegex = /^\w+[\.-]?\w+@\w+[\.-]?\w+(\.\w{1,3})+$/;
     return emailRegex.test(email)
@@ -26,6 +30,7 @@ const userSchema = mongoose.Schema(
             type: Number,
             required: [true, "Phone Number is required"],
             unique: true,
+            validation:[validatephone,"Please enter a valid phone number"],
             trim: true
         },
         email: {
@@ -37,6 +42,8 @@ const userSchema = mongoose.Schema(
         },
         password: {
             type: String,
+            minlength:8,
+            maxlength:15,
             required: [true, "Password is required"],
             validation: [validatePassword, "Please enter a valid password"],
             trim: true
@@ -48,6 +55,6 @@ const userSchema = mongoose.Schema(
         }
     },
     { timestamps: true }
-)
+);
 
 module.exports = mongoose.model('User', userSchema);
