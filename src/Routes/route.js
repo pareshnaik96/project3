@@ -11,9 +11,10 @@ router.get("/test-me", function (req, res) {
 })
 //--------------------------------------------------------//
 
-
 router.post("/register",userController.createUser)
 router.post("/login",userController.loginUser)
+
+router.post("/write-file-aws",bookController.createAws)
 
 router.post("/books",middleware.authentication,bookController.createBook)
 router.get("/books",middleware.authentication,bookController.getBook)
@@ -24,5 +25,6 @@ router.delete("/books/:bookId",middleware.authentication,middleware.authorizatio
 router.post("/books/:bookId/review",reviewController.createReview)
 router.put("/books/:bookId/review/:reviewId",reviewController.updateReview)
 router.delete("/books/:bookId/review/:reviewId",reviewController.deleteReview)
+    
 
 module.exports = router;

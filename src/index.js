@@ -8,6 +8,9 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const multer= require("multer");
+app.use( multer().any())
+
 mongoose.connect("mongodb+srv://pareshnaik:W536yetBeRCk0yL8@cluster0.m9yz9.mongodb.net/project3-DB?retryWrites=true&w=majority", {
     useNewUrlParser: true
 })

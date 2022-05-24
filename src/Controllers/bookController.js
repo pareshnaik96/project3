@@ -2,6 +2,8 @@ const bookModel = require("../Models/bookModel");
 const userModel = require("../Models/userModel");
 const reviewModel = require("../Models/reviewModel")
 const validator = require("../util/validator")
+const aws = require("aws-sdk");
+
 const ObjectId = require("mongoose").Types.ObjectId;
 
 
@@ -9,7 +11,56 @@ const isValidRequestBody = function (request) {
     return (Object.keys(request).length > 0)
 }
 
-const { isValid,isValid8,isValid9} = validator
+const { isValid, isValid8, isValid9 } = validator
+
+
+aws.config.update({
+    accessKeyId: "AKIAY3L35MCRUJ6WPO6J",
+    secretAccessKey: "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",
+    region: "ap-south-1"
+})
+
+let uploadFile = async (file) => {
+    return new Promise(function (resolve, reject) {
+        let s3 = new aws.S3({ apiVersion: '2006-03-01' });
+        // this function will upload file to aws and return the link
+        // we will be using the s3 service of aws
+        var uploadParams = {
+            ACL: "public-read",
+            Bucket: "classroom-training-bucket",
+            Key: "abc/" + file.originalname,
+            Body: file.buffer
+        }
+
+
+        s3.upload(uploadParams, function (err, data) {
+            if (err) {
+                return reject({ "error": err })
+            }
+            console.log(data)
+            console.log("file uploaded succesfully")
+            return resolve(data.Location)
+        })
+
+    })
+}
+
+const createAws = async function (req, res) {
+    try {
+        let files = req.files
+        if (files && files.length > 0) {
+            let uploadedFileURL = await uploadFile(files[0])
+            res.status(201).send({ msg: "file uploaded succesfully", data: uploadedFileURL })
+        }
+        else {
+            res.status(400).send({ msg: "No file found" })
+        }
+    }
+    catch (err) {
+        res.status(500).send({status:false, msg: err.message})
+    }
+
+}
 
 const createBook = async function (req, res) {
     try {
@@ -53,14 +104,14 @@ const createBook = async function (req, res) {
             const duplicateTitle = await bookModel.findOne({ title })
             if (duplicateTitle)
                 return res.status(400).send({ status: false, message: "Title already exists" })
-    
+
             const duplicateISBN = await bookModel.findOne({ ISBN })
             if (duplicateISBN)
                 return res.status(400).send({ status: false, message: "ISBN already exists" })
 
             const saveData = await bookModel.create(data)
             return res.status(201).send({ status: true, data: saveData })
-        
+
         }
         else {
             return res.status(400).send({ status: false, msg: "NO USER INPUT" })
@@ -80,7 +131,7 @@ const getBook = async function (req, res) {
 
         let data = req.query
         let { userId, category, subcategory } = data
-        
+
 
         let filter = { isDeleted: false }
 
@@ -96,11 +147,11 @@ const getBook = async function (req, res) {
         if (isValid(subcategory)) {
             filter["subcategory"] = subcategory
         }
-        
-        let books = await bookModel.find(filter).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1,subcategory:1,reviews:1, releasedAt: 1 }).sort({ title: 1 })
 
-        if(books && books.length === 0)
-        return res.status(404).send({ status: false, msg: "no such document exist or it maybe deleted" })
+        let books = await bookModel.find(filter).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, subcategory: 1, reviews: 1, releasedAt: 1 }).sort({ title: 1 })
+
+        if (books && books.length === 0)
+            return res.status(404).send({ status: false, msg: "no such document exist or it maybe deleted" })
 
         return res.status(200).send({ status: true, msg: "Book list accessed successfully", data: books })
 
@@ -214,3 +265,4 @@ module.exports.getBook = getBook
 module.exports.updateBookById = updateBookById
 module.exports.getBookById = getBookById
 module.exports.deleteBookById = deleteBookById
+module.exports.createAws = createAws

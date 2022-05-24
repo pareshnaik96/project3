@@ -9,6 +9,11 @@ const bookSchema = mongoose.Schema(
             unique: true,
             trim: true
         },
+        bookCover: {
+            type: String,
+            required: [true, "Book Cover is required"],
+            unique: true
+        },
         excerpt: {
             type: String,
             required: [true, "Excerpt is required"],
@@ -50,7 +55,7 @@ const bookSchema = mongoose.Schema(
         },
         releasedAt: {
             type: Date,
-            required:[true,"Released date is Required"],
+            required: [true, "Released date is Required"],
         }
     },
     { timestamps: true }
